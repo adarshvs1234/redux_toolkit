@@ -1,4 +1,6 @@
 const redux = require('redux')
+const applyMiddleware = redux.applyMiddleware
+const reduxLogger= require('redux-logger')
 
 const createStore = redux.legacy_createStore
 const CAKE_ORDERED = 'CAKE_ORDERED'
@@ -8,6 +10,7 @@ const ICECREAM_RESTOCKED = 'ICECREAM_RESTOCKED'
 const bindActionCreators = redux.bindActionCreators
 const combineReducers = redux.combineReducers
 
+const logger =  reduxLogger.createLogger()
 
 function orderCake(){
 
@@ -48,11 +51,15 @@ function restockIceCream(qty=1){
 // }
 
 
-// const initialState={
-    
-// }
+const initialCakeState={
+    numOfCakes:10
+}
 
-const reducer = (state=initialState,action)=>{
+const initialIceCreamState={
+    numOfIcecream:20
+}
+
+const cakeReducer = (state=initialCakeState,action)=>{
 
     switch(action.type){
 
@@ -69,7 +76,15 @@ const reducer = (state=initialState,action)=>{
                 numOfCakes:state.numOfCakes+ action.payload
             }
 
+            default:
+                return state
+        }
+    }
 
+const iceCreamReducer = (state=initialIceCreamState,action)=>{
+
+
+    switch(action.type){
         case ICECREAM_ORDERED:
             return{
                 ...state,
@@ -83,17 +98,19 @@ const reducer = (state=initialState,action)=>{
                     numOfIcecream:state.numOfIcecream + action.payload
                 }
 
-        default:
-            return state
-    }
-}
+                default:
+                    return state
+            }
+            
+        }
+
+const rootReducer = combineReducers({
+    cake:cakeReducer,
+    iceCream : iceCreamReducer
+})
 
 
-// const rootReducer = combineReducers({
-//     cake:cakeReducer,
-//     iceCream : iceCreamReducer
-// })
-const store = createStore(reducer)
+const store = createStore(rootReducer,applyMiddleware(logger))
 console.log('initial state',store.getState());
 
 
@@ -118,6 +135,8 @@ actions.orderIceCream()
 actions.orderIceCream()
 actions.orderIceCream()
 actions.orderIceCream(1)
-actions.restockIceCream(8)
+actions.restockIceCream(4)
 
 unsubscribe()
+
+
